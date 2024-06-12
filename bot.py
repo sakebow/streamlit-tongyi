@@ -1,6 +1,5 @@
 import asyncio                                                              # 异步处理器
-import streamlit as st                                                      # 大模型demo包装器
-from dotenv import load_dotenv                                              # 读取.env文件
+import streamlit as st                                                      # 大模型demo包装器                                           # 读取.env文件
 from playwright.async_api import async_playwright                           # 异步控制
 from langchain.schema import Document                                       # 网页文档容器
 from langchain.chains.llm import LLMChain                                   # 包装一个大模型的类
@@ -11,7 +10,8 @@ from langchain.chains.combine_documents.stuff import StuffDocumentsChain    # �
 from langchain_community.document_transformers import Html2TextTransformer  # html转text
 
 # 读取api-key
-load_dotenv()
+import os
+os.environ["DASHSCOPE_API_KEY"] = st.secrets["DASHSCOPE_API_KEY"]
 
 # Page Config
 st.set_page_config("中医药问诊小程序", page_icon=":hospital:")
