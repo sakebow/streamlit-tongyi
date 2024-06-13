@@ -1,5 +1,5 @@
 import asyncio                                                              # 异步处理器
-import streamlit as st                                                      # 大模型demo包装器                                           # 读取.env文件
+import streamlit as st                                                      # 大模型demo包装器
 from playwright.async_api import async_playwright                           # 异步控制
 from langchain.schema import Document                                       # 网页文档容器
 from langchain.chains.llm import LLMChain                                   # 包装一个大模型的类
@@ -69,8 +69,7 @@ stf_chain = StuffDocumentsChain(
         llm=Tongyi(),
         prompt=prompt,
         verbose=True,
-        memory=memory,
-        output_key="text"
+        memory=memory
     ),
     document_variable_name="text"
 )
