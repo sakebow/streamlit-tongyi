@@ -9,6 +9,10 @@ LLM_OPTION["model_name"] = "qwen-max"
 LLM_OPTION["top_p"] = 0.9
 
 def test_availablity():
+  """
+  测试程序可用性
+  其中，当出现SSLError时，一般为网络中断，可以尝试重新运行。
+  """
   try:
     llm = get_llm_factory(llm_type = LLM_TYPE, **LLM_OPTION)
     result = llm.invoke("What NFL team won the Super Bowl in the year Justin Bieber was born?")
