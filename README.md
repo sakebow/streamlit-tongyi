@@ -8,6 +8,53 @@
 
 创建知识图谱的过程可能需要各位想办法搭建了，这里只提供`bot.py`中所需要的包。
 
+### -1. 自己本地部署大模型
+
+无论你是使用`Ollama`还是什么乱七八糟的，反正，给出来一个兼容`OpenAI`的接口就是了。
+
+要求输入参数为：
+
+```json
+{
+  "model": "xxx",
+  "messages": [...],
+  "max_tokens": xxx
+  "temperature": xxx,
+  "top_p": xxx
+  "stream": false
+}
+```
+
+要求输出参数为：
+
+```json
+{
+  "id": "xxx",
+  "object": "chat.completion",
+  "created": xxx,
+  "model": "xxx",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "xxx",
+        "content": "xxx"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": xxx,
+    "completion_tokens": xxx,
+    "total_tokens": xxx
+  }
+}
+```
+
+有了这玩意，就可以自定义一个`LLM`。
+
+当然，如果你恰好购买了`qwen`，那么直接使用即可。
+
 ### 0. 注册并获得通义千问的`API-Key`
 
 这里仅使用了`api-key`，没有用到`secret-key`。
