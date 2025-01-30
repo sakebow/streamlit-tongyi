@@ -2,6 +2,8 @@
 
 >❗随着`langchain`的更新，库中大量内容也将翻新，并按照不同的功能分类存放，便于查看。
 
+>❗该项目进一步通过`pyproject.toml`进行依赖管理，整个架构再次更新。
+
 同样的，感谢[liuhuanyong](https://github.com/liuhuanyong)老哥提供的医药数据库与[ranying666](https://github.com/ranying666)老哥提供的`langchain+qwen`代码。
 
 ## 怎么跑起来：手动部署
