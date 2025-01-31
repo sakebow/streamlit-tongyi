@@ -2,7 +2,7 @@ import streamlit as st
 from langchain_community.llms import Tongyi
 from langchain_core.language_models.llms import BaseLLM
 
-from llms import ModelConfig, LLMFactory
+from llms.model import ModelConfig, LLMFactory
 
 default_tongyi_config = ModelConfig(
   name = "qwen-max",

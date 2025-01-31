@@ -5,12 +5,14 @@ import streamlit as st
 
 from langchain_core.language_models.llms import LLM, BaseLLM
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
+from langchain_core.messages import HumanMessage, AIMessage
 
 
 from typing import Any, Dict, List, Optional
 from pydantic import Field
 
-from llms import ModelConfig, LLMFactory, MemoryBucket
+from llms.model import ModelConfig, LLMFactory
+from llms.memory import MemoryBucket
 
 default_cmdi_config = ModelConfig(
   name = "Qwen-2.5-72B-Instruct",
@@ -107,6 +109,9 @@ class CMDIFactory(LLMFactory):
 __all__ = ["CMDIFactory", "default_cmdi_config"]
 
 if __name__ == "__main__":
-  cmdi = CMDIFactory(default_cmdi_config).create()
-  results = cmdi.invoke("你好")
+  cmdi_factory = CMDIFactory(default_cmdi_config)
+  cmdi = cmdi_factory.create()
+  cmdi_factory.memory.add_langchain_message(HumanMessage(content = "你好"), role = "user")
+  cmdi_factory.memory.add_langchain_message(AIMessage(content = "你好！我是千问，有什么能帮助你的吗？"), role = "assistant")
+  results = cmdi.invoke("这是我的第几个问题了？")
   print(results)
