@@ -18,7 +18,11 @@ dependencies = [
     "cryptography (>=44.0.0,<45.0.0)",
     "langgraph (>=0.2.68,<0.3.0)",
     "streamlit (>=1.41.1,<2.0.0)",
-    "neo4j (>=5.27.0,<6.0.0)"
+    "neo4j (>=5.27.0,<6.0.0)",
+    "pymilvus (>=2.5.4,<3.0.0)",
+    "numpy (>=2.2.2,<3.0.0)",
+    "pandas (>=2.2.3,<3.0.0)",
+    "setuptools (>=75.8.0,<76.0.0)",
 ]
 
 
@@ -29,6 +33,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "tongyibot"
 packages = [
-    { include = "utils" }
-    { include = "llms" }
+    { include = "utils" },
+    { include = "llms" },
+    { include = "ui" }
 ]
