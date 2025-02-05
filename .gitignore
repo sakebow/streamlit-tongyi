@@ -1,0 +1,11 @@
+.gitattributes*
+.idea*
+.vscode*
+*pycache*
+.DS_Store
+
+.git/
+.streamlit/*
+# upload/*
+
+*.db

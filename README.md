@@ -6,93 +6,89 @@
 
 同样的，感谢[liuhuanyong](https://github.com/liuhuanyong)老哥提供的医药数据库与[ranying666](https://github.com/ranying666)老哥提供的`langchain+qwen`代码。
 
-## 怎么跑起来：手动部署
+## 依赖安装
 
-创建知识图谱的过程可能需要各位想办法搭建了，这里只提供`bot.py`中所需要的包。
+>❗本项目目前测试<span style="color:green">**通过**</span>的环境为：
+>
+> |key|value|
+> |---|---|
+> |python|>=3.12|
+> |OS|AlmaLinux 9.5 x86_64|
+>
+>❗本项目目前测试<span style="color:red">**失败**</span>的环境为：
+>
+> |key|value|
+> |---|---|
+> |python|>=3.12|
+> |OS|Windows 11 x86_64|
+> 
+> 原因：本项目依赖`pymilvus`，而`pymilvus`目前明确不支持`Windows`，明确支持`Ubuntu`与`MacOS`。本项目于`AlmaLinux`环境中走到这一步完全是凭运气
+> 
+> （*首*）：哼，哼，哼，啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
 
-### -1. 自己本地部署大模型
+最开始的开始，当然是下载代码：
 
-无论你是使用`Ollama`还是什么乱七八糟的，反正，给出来一个兼容`OpenAI`的接口就是了。
+```bash
+$ git clone https://github.com/sakebow/streamlit-tongyi.git
+```
 
-要求输入参数为：
+由于`poetry`的引入，因此依赖安装过程稍有变化，请按照以下步骤进行安装：
+
+0. 若未使用`conda`，则直接跳转到步骤 $1$ ；若已安装`conda`，请不要卸载`conda`，直接利用虚拟环境执行依赖安装过程：
+
+```bash
+$ conda create -n llm python=3.12 -y
+$ conda activate llm
+```
+
+1. 安装`poetry`：
+
+```bash
+$ pip install poetry
+```
+
+2. 安装项目依赖：
+
+```bash
+$ poetry install
+```
+
+## 参数配置
+
+项目的`.streamlit`文件夹中存在配置文件`secrets.toml`，配置其中所需要的参数即可。
+
+目前必须要有的参数只有一个：`DASHSCOPE_API_KEY`，用于调用`DashScope`的`API`。各位可以[移步此处](https://bailian.console.aliyun.com/)进行申请或购买。
+
+另外的参数暂时不是必须的，目前提供功能的只有：`APPCODE_TYP`、`APPCODE_KEY`、`NEO4J_ADDR`、`NEO4J_PORT`、`NEO4J_USER`、`NEO4J_PASS`、`BASE_URL`、`OPEN_URL`。
+
+其中：
+
+- `NEO4J_ADDR`、`NEO4J_PORT`、`NEO4J_USER`、`NEO4J_PASS`用于提供知识图谱服务
+  - 主要方便用户自行添加知识图谱。
+- `APPCODE_TYP`、`APPCODE_KEY`、`BASE_URL`、`OPEN_URL`提供自定义大模型服务
+  - 主要方便用户自行添加`MindIE`部署的大模型服务；
+  - 或者其他大模型，只要返回结果兼容`OpenAI`格式即可；
+  - 目前测试通过的大模型有：
+    - 九天大模型
+
+## 项目体验
+
+由于目前项目没有彻底完成，所以可以在项目中搜索`__main__`，从而找到可以单独执行的代码，直接运行即可查看结果。
+
+当然，体验之前需要各位最起码购买了阿里云百炼的`api-key`。
+
+### 即时知识库搜索
+
+执行文件`utils/embeddings_manager.py`（使用`IDE`或者`Shell`均可）
+
+可以得到结果：
 
 ```json
-{
-  "model": "xxx",
-  "messages": [...],
-  "max_tokens": xxx
-  "temperature": xxx,
-  "top_p": xxx
-  "stream": false
-}
+[
+  {'id': 0, 'distance': 0.7548444271087646, 'entity': {'text': '王兴：我跟程维认识也挺早，2011年。'}},
+  {'id': 1, 'distance': 0.7238685488700867, 'entity': {'text': '程维：应该是2011年。'}},
+  {'id': 3, 'distance': 0.6937779784202576, 'entity': {'text': '程维：当时我在支付宝，因为业务合作认识王兴的。'}},
+  {'id': 4, 'distance': 0.6418972015380859, 'entity': {'text': '王兴：程维负责对接我们，当时他在支付宝商户事业部。'}},
+  {'id': 2, 'distance': 0.5877269506454468, 'entity': {'text': '骆轶航：那是一个什么样的场合你们俩认识？'}}
+]
 ```
-
-要求输出参数为：
-
-```json
-{
-  "id": "xxx",
-  "object": "chat.completion",
-  "created": xxx,
-  "model": "xxx",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "xxx",
-        "content": "xxx"
-      },
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": xxx,
-    "completion_tokens": xxx,
-    "total_tokens": xxx
-  }
-}
-```
-
-有了这玩意，就可以自定义一个`LLM`。
-
-当然，如果你恰好购买了`qwen`，那么直接使用即可。
-
-### 0. 注册并获得通义千问的`API-Key`
-
-这里仅使用了`api-key`，没有用到`secret-key`。
-
-在使用模型的时候，我使用的是默认的`qwen-plus`。
-
-如果你有一定的基础，你会发现有些教程将模型指定为`qwen-turbo-3.5`等等，这都需要各位自定义了。
-
-当你获取到`api-key`之后，你就需要将`api-key`放到`.env`文件中。
-
-### 1. 安装依赖
-
-```shell
-$ pip install -r requirements.txt
-```
-
-如果是`Windows`系统的话，推荐额外运行`Chromium`的安装。当然，并不是让你去下载安装包，而是额外利用`playwright`来安装：
-
-```shell
-$ playwright install
-```
-
-如果是`Linux`，尤其是`minimal`版本，执行`playwright install`后将提出一大堆依赖问题。但是貌似并不影响使用，至少在阿里云`AlmaLinux`上没有出现任何问题。
-
-### 2. 运行
-
-目前可用的仅包含根据通义千问官方给出的文档调试的`functions/test.py`，后续也将持续更新。
-
-## 怎么跑起来：Docker部署
-
-由于版本更新，`Docker`内容暂时下架。
-
-如果需要使用，请在`tag`中找到以前的版本。
-
-# 坑爹的地方
-
-该坑爹还是坑爹，这部分保留。
-
-现在这个部分已经移到了[个人博客](http://hexo.sakebow.cn/)中的[这篇文章](http://hexo.sakebow.cn/2024/06/13/LLM/langchain-io-api/)里，方便各位查看。

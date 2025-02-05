@@ -1,9 +1,9 @@
 import os
 import re
-import json
 from http import HTTPStatus
-from pymilvus import MilvusClient, FieldSchema, CollectionSchema, DataType
+from pymilvus.client.types import ExtraList
 from pymilvus.milvus_client.index import IndexParams
+from pymilvus import MilvusClient, FieldSchema, CollectionSchema, DataType
 from typing import Sequence, List, Dict
 
 import dashscope
@@ -113,26 +113,26 @@ class EmbeddingSearcher:
       output_fields = ["text"]
     )
     """
-      result输出：
+    result输出：
       data: ["[
-        {'id': 0, 'distance': 0.7548444271087646, 'entity': {'text': '王兴：我跟程维认识也挺早，2011年。'}},
-        {'id': 1, 'distance': 0.7238685488700867, 'entity': {'text': '程维：应该是2011年。'}},
-        {'id': 3, 'distance': 0.6937779784202576, 'entity': {'text': '程维：当时我在支付宝，因为业务合作认识王兴的。'}}]
+        {'id': 0, 'distance': 0.7548444271087646, 'entity': {'text': ...}},
+        {'id': 1, 'distance': 0.7238685488700867, 'entity': {'text': ...}},
+        {'id': 3, 'distance': 0.6937779784202576, 'entity': {'text': ...}}]
       "]
-      因此解包需要指定返回第一个结果
+    因此解包需要指定返回第一个结果
     """
     return result[0]
 
 if __name__ == "__main__":
   # wcnmd，milvus不支持windows
   # wdnmd，目前milvus在AlmaLinux+Xfce上表现良好，MacOS 未测试
-  strings: Sequence[str] = Text2Embed.split_local_content("upload/short.txt")
+  strings: Sequence[str] = Text2Embed.split_local_content("upload/example.txt")
   
   embeddings: Sequence = [{"id": idx, "embeddings": Text2Embed.embeddings_content(s), "text": s} for idx, s in enumerate(strings)]
   
   client: MilvusClient = None
   client = EmbeddingSearcher.create_or_replace(client, "rag_test", "demo", 1024, embeddings)
 
-  result = EmbeddingSearcher.embedding_search(client, "demo", "跟程维认是是什么时候")
+  result: ExtraList = EmbeddingSearcher.embedding_search(client, "demo", "跟程维认是是什么时候")
   
   print(result)
