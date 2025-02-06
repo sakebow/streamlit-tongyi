@@ -4,14 +4,11 @@ import streamlit as st
 from pymilvus import MilvusClient
 from langchain.agents.agent_types import AgentType
 from langchain.agents import initialize_agent, tool
+from langchain.callbacks.streamlit import StreamlitCallbackHandler
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 from llms import TongyiFactory
-from utils import EmbeddingSearcher, Text2Embed
-
-DATABASE_NAME = "rag_test"
-COLLECTION_NAME = "demo"
-client: MilvusClient = None
+from utils import EmbeddingSearcher, Text2Embed, DefaultCommonConfig
 
 @st.cache_resource(ttl = "1h")
 def configure_retriever(uploaded_files: Sequence[UploadedFile]) -> MilvusClient:
@@ -32,13 +29,17 @@ def configure_retriever(uploaded_files: Sequence[UploadedFile]) -> MilvusClient:
   ]
   
   client: MilvusClient = None
-  client = EmbeddingSearcher.create_or_replace(client, DATABASE_NAME, COLLECTION_NAME, 1024, embeddings)
+  client = EmbeddingSearcher.create_or_replace(
+    client,
+    DefaultCommonConfig.DATABASE_NAME, DefaultCommonConfig.COLLECTION_NAME,
+    1024, embeddings
+  )
   return client
 
 
 # 页面配置
-st.set_page_config(page_title = "llm_test", page_icon = ":hotdog:", layout = "wide")
-st.title("llm_test")
+st.set_page_config(page_title = "rag_test", page_icon = ":hotdog:", layout = "wide")
+st.title("rag_test")
 
 # 侧边上传文件
 uploaded_files = st.sidebar.file_uploader(
@@ -53,7 +54,7 @@ def search_content_with_llm(user_input: str) -> str:
   if "file_message" in st.session_state:
     return st.session_state.file_message
   client: MilvusClient = configure_retriever(uploaded_files)
-  results = EmbeddingSearcher.embedding_search(client, COLLECTION_NAME, user_input)
+  results = EmbeddingSearcher.embedding_search(client, DefaultCommonConfig.COLLECTION_NAME, user_input)
   content = "\n".join([result["entity"]["text"] for result in results])
   st.session_state.file_message = content
   return content
@@ -83,6 +84,5 @@ for message in st.session_state.messages:
 
 if user_input := st.chat_input("想说点什么？"):
   write_message("user", user_input)
-  with st.spinner("正在思考中..."):
-    response = agent.run(user_input)
-    write_message("assistant", response)
+  response = agent.run(user_input, callbacks = [StreamlitCallbackHandler(st.container())])
+  write_message("assistant", response)
