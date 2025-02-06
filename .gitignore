@@ -6,6 +6,6 @@
 
 .git/
 .streamlit/*
-# upload/*
+upload/*
 
 *.db

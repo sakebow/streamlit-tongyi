@@ -11,23 +11,26 @@ import streamlit as st
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 class DefaultCommonConfig(enumerate):
-  DIMENSION = 1024
+  DIMENSION: int = 1024
+  SPLIT_PATTERN_LIST: List = ["\n", "\n\n"]
 
 class Text2Embed:
   """
   将文件转为向量embedding
   """
   dashscope.api_key = st.secrets["DASHSCOPE_API_KEY"]
-  split_pattern_list: List = ["\n", "\n\n"]
   @staticmethod
-  def split_content(file: UploadedFile) -> Sequence[str]:
+  def split_content(file: UploadedFile, save_path: str = None) -> Sequence[str]:
     """
-    将上传的文件分割为多个文本块
+    将上传的文件分割为多个文本块，并保存到本地
     """
     _tmp_one_file_texts = file.read().decode("utf-8", errors = "ignore")
-    pattern = "|".join(Text2Embed.split_pattern_list)
+    pattern = "|".join(DefaultCommonConfig.SPLIT_PATTERN_LIST)
     chunks = re.split(pattern = pattern, string = _tmp_one_file_texts)
     chunks = [chunk.strip() for chunk in chunks if chunk.strip()]
+    if save_path is not None and os.path.exists(save_path):
+      with open(file = save_path, mode = "w", encoding = "utf-8") as f:
+        f.write("\n".join(chunks))
     return chunks
   @staticmethod
   def split_local_content(file_path: str) -> Sequence[str]:
@@ -36,7 +39,7 @@ class Text2Embed:
     """
     with open(file_path, 'r', encoding = 'utf-8') as f:
       file_content = f.read()
-    pattern = "|".join(Text2Embed.split_pattern_list)
+    pattern = "|".join(DefaultCommonConfig.SPLIT_PATTERN_LIST)
     chunks = re.split(pattern = pattern, string = file_content)
     chunks = [chunk.strip() for chunk in chunks if chunk.strip()]
     return chunks
@@ -100,7 +103,7 @@ class EmbeddingSearcher:
     return client
   @staticmethod
   def embedding_search(
-    client: MilvusClient, collection_name: str, question: str
+    client: MilvusClient, collection_name: str, question: str, top_k: int = 5
   ) -> Sequence[Sequence[Dict]]:
     """
     搜索向量
@@ -109,7 +112,7 @@ class EmbeddingSearcher:
       collection_name = collection_name,
       anns_field = "embeddings",  # 指定搜索的向量字段名（关键参数）
       data = [Text2Embed.embeddings_content(content = question)], # 输入搜索向量
-      limit = 5,
+      limit = top_k,
       output_fields = ["text"]
     )
     """
@@ -117,7 +120,7 @@ class EmbeddingSearcher:
       data: ["[
         {'id': 0, 'distance': 0.7548444271087646, 'entity': {'text': ...}},
         {'id': 1, 'distance': 0.7238685488700867, 'entity': {'text': ...}},
-        {'id': 3, 'distance': 0.6937779784202576, 'entity': {'text': ...}}]
+        {'id': 3, 'distance': 0.6937779784202576, 'entity': {'text': ...}}, ...]
       "]
     因此解包需要指定返回第一个结果
     """
@@ -128,11 +131,14 @@ if __name__ == "__main__":
   # wdnmd，目前milvus在AlmaLinux+Xfce上表现良好，MacOS 未测试
   strings: Sequence[str] = Text2Embed.split_local_content("upload/example.txt")
   
-  embeddings: Sequence = [{"id": idx, "embeddings": Text2Embed.embeddings_content(s), "text": s} for idx, s in enumerate(strings)]
+  embeddings: Sequence = [
+    {"id": idx, "embeddings": Text2Embed.embeddings_content(s), "text": s}
+    for idx, s in enumerate(strings)
+  ]
   
   client: MilvusClient = None
   client = EmbeddingSearcher.create_or_replace(client, "rag_test", "demo", 1024, embeddings)
 
-  result: ExtraList = EmbeddingSearcher.embedding_search(client, "demo", "跟程维认是是什么时候")
+  result: ExtraList = EmbeddingSearcher.embedding_search(client, "demo", "跟程维认识是什么时候")
   
   print(result)
