@@ -92,3 +92,35 @@ $ poetry install
   {"id": 2, "distance": 0.5877269506454468, "entity": {"text": "骆轶航：那是一个什么样的场合你们俩认识？"}}
 ]
 ```
+
+### 加上Streamlit界面的即时知识库搜索
+
+执行文件`ui/search_test.py`（只能使用脚本）：
+
+```bash
+$ streamlit run ui/search_test.py
+```
+
+就会出现界面。
+
+上传`upload/example.txt`文件，并围绕文件内容进行提问，就可以搜索到答案。
+
+如图所示：
+
+![加上Streamlit界面的即时知识库搜索](./assets/通义的Embeddings服务返回值.png)
+
+### 加上Streamlit界面、加上LLM的知识库搜索
+
+执行文件`ui/rag_test.py`（只能使用脚本）：
+
+```bash
+$ streamlit run ui/rag_test.py
+```
+
+就会出现界面。
+
+上传`upload/example.txt`文件，并围绕文件内容进行提问，就可以搜索到答案。
+
+如图所示：
+
+![加上Streamlit界面、加上LLM的知识库搜索](./assets/通义千问的RAG.png)

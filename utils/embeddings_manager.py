@@ -104,7 +104,7 @@ class EmbeddingSearcher:
   @staticmethod
   def embedding_search(
     client: MilvusClient, collection_name: str, question: str, top_k: int = 5
-  ) -> Sequence[Sequence[Dict]]:
+  ) -> Sequence[Dict]:
     """
     搜索向量
     """
