@@ -29,7 +29,7 @@ def configure_retriever(uploaded_files: Sequence[UploadedFile]) -> MilvusClient:
   return client
 
 # 页面配置
-st.set_page_config(page_title = "embeddings_search", page_icon = ":hotdog:", layout = "wide")
+# st.set_page_config(page_title = "embeddings_search", page_icon = ":hotdog:", layout = "wide")
 st.title("embeddings_search")
 # 用户交互
 user_input = st.chat_input("请输入问题")

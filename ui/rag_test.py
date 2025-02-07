@@ -38,7 +38,7 @@ def configure_retriever(uploaded_files: Sequence[UploadedFile]) -> MilvusClient:
 
 
 # 页面配置
-st.set_page_config(page_title = "rag_test", page_icon = ":hotdog:", layout = "wide")
+# st.set_page_config(page_title = "rag_test", page_icon = ":hotdog:", layout = "wide")
 st.title("rag_test")
 
 # 侧边上传文件

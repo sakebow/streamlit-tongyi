@@ -1,10 +1,11 @@
 from utils.file_manager import FileManager
 from utils.embeddings_manager import Text2Embed, EmbeddingSearcher
-from utils.common import DefaultCommonConfig
+from utils.common import DefaultCommonConfig, RagHelper
 
 __all__ = [
   "FileManager",
   "Text2Embed",
   "EmbeddingSearcher",
-  "DefaultCommonConfig"
+  "DefaultCommonConfig",
+  "RagHelper"
 ]

@@ -107,7 +107,7 @@ $ streamlit run ui/search_test.py
 
 如图所示：
 
-![加上Streamlit界面的即时知识库搜索](./assets/通义的Embeddings服务返回值.png)
+![加上Streamlit界面的即时知识库搜索](./readme-img/通义的Embeddings服务返回值.png)
 
 ### 加上Streamlit界面、加上LLM的知识库搜索
 
@@ -123,4 +123,4 @@ $ streamlit run ui/rag_test.py
 
 如图所示：
 
-![加上Streamlit界面、加上LLM的知识库搜索](./assets/通义千问的RAG.png)
+![加上Streamlit界面、加上LLM的知识库搜索](./readme-img/通义千问的RAG.png)
