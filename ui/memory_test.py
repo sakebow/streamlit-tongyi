@@ -25,7 +25,7 @@ if "messages" not in st.session_state:
     "content": "你好，我是九天平台的大模型，有什么可以帮你？"
   }]
 
-uploaded_file: Sequence[UploadedFile] = st.sidebar.file_uploader("上传文件", type = ["txt"], accept_multiple_files = True)
+uploaded_file: Sequence[UploadedFile] = st.sidebar.file_uploader("上传文件", type = DefaultCommonConfig.SUPPORT_TYPES, accept_multiple_files = True)
 
 def write_message(role: str, message: str, save: bool = True):
   if save:

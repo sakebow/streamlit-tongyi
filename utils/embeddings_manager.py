@@ -1,5 +1,6 @@
 import os
 import re
+import pdfplumber
 from http import HTTPStatus
 from pymilvus.client.types import ExtraList
 from pymilvus.milvus_client.index import IndexParams
@@ -20,18 +21,42 @@ class Text2Embed:
   """
   dashscope.api_key = st.secrets["DASHSCOPE_API_KEY"]
   @staticmethod
+  def txt_retriever(file: UploadedFile, save_path: str = None) -> MilvusClient:
+    """
+    将上传的文件分割为多个文本块，并保存到本地
+    """
+    _, filext = os.path.splitext(file.name)
+    if filext != ".txt": return []
+    _tmp_one_file_texts:str = file.read().decode("utf-8", errors = "ignore")
+    pattern: str = "|".join(DefaultCommonConfig.SPLIT_PATTERN_LIST)
+    chunks: Sequence[str] = re.split(pattern = pattern, string = _tmp_one_file_texts)
+    chunks = [chunk.strip() for chunk in chunks if chunk.strip()]
+    if save_path is not None and os.path.exists(save_path):
+      with open(file = f"{save_path}/{file.name}", mode = "w", encoding = "utf-8") as f:
+        f.write("\n".join(chunks))
+    return chunks
+  @staticmethod
+  def pdf_retriever(file: UploadedFile, save_path: str = None) -> MilvusClient:
+    """
+    将上传的文件分割为多个文本块，并保存到本地
+    """
+    _, filext = os.path.splitext(file.name)
+    if filext != ".pdf": return []
+    chunks: List[str] = []
+    with pdfplumber.open(file = file) as pdf:
+      pattern: str = "|".join(DefaultCommonConfig.SPLIT_PATTERN_LIST)
+      for page in pdf.pages:
+        chunks.extend(re.split(pattern = pattern, string = page.extract_text()))
+    return chunks
+  @staticmethod
   def split_content(file: UploadedFile, save_path: str = None) -> Sequence[str]:
     """
     将上传的文件分割为多个文本块，并保存到本地
     """
-    _tmp_one_file_texts = file.read().decode("utf-8", errors = "ignore")
-    pattern = "|".join(DefaultCommonConfig.SPLIT_PATTERN_LIST)
-    chunks = re.split(pattern = pattern, string = _tmp_one_file_texts)
-    chunks = [chunk.strip() for chunk in chunks if chunk.strip()]
-    if save_path is not None and os.path.exists(save_path):
-      with open(file = save_path, mode = "w", encoding = "utf-8") as f:
-        f.write("\n".join(chunks))
-    return chunks
+    final_chunks: List[str] = []
+    final_chunks.extend(Text2Embed.txt_retriever(file, save_path))
+    final_chunks.extend(Text2Embed.pdf_retriever(file, save_path))
+    return final_chunks
   @staticmethod
   def split_local_content(file_path: str) -> Sequence[str]:
     """

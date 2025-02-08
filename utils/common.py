@@ -12,6 +12,8 @@ class DefaultCommonConfig(enumerate):
   DATABASE_NAME: str = "rag_test"
   COLLECTION_NAME: str = "demo"
 
+  SUPPORT_TYPES = ["txt", "pdf"]
+
 class RagHelper:
   @staticmethod
   def configure_retriever(uploaded_files: Sequence[UploadedFile]) -> MilvusClient:

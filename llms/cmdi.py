@@ -14,8 +14,19 @@ from pydantic import Field
 from llms.model import ModelConfig, LLMFactory
 from llms.memory import MemoryBucket
 
+# default_cmdi_config = ModelConfig(
+#   name = "Qwen-2.5-72B-Instruct",
+#   api_key = f"{st.secrets['APPCODE_TYP']} {st.secrets['APPCODE_KEY']}",
+#   max_tokens = 32768,
+#   presence_penalty = 0.9,
+#   frequency_penalty = 0.9,
+#   temperature = 0.7,
+#   top_p = 0.95,
+#   stream = False
+# )
+
 default_cmdi_config = ModelConfig(
-  name = "Qwen-2.5-72B-Instruct",
+  name = "DeepSeek-R1-Distill-Qwen-14B",
   api_key = f"{st.secrets['APPCODE_TYP']} {st.secrets['APPCODE_KEY']}",
   max_tokens = 32768,
   presence_penalty = 0.9,

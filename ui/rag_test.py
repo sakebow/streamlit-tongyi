@@ -43,7 +43,7 @@ st.title("rag_test")
 
 # 侧边上传文件
 uploaded_files = st.sidebar.file_uploader(
-  label = "上传文件", type = ["txt"], accept_multiple_files = True
+  label = "上传文件", type = DefaultCommonConfig.SUPPORT_TYPES, accept_multiple_files = True
 )
 
 @tool

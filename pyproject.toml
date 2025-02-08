@@ -23,6 +23,7 @@ dependencies = [
     "numpy (>=2.2.2,<3.0.0)",
     "pandas (>=2.2.3,<3.0.0)",
     "setuptools (>=75.8.0,<76.0.0)",
+    "pdfplumber (>=0.11.5,<0.12.0)",
 ]
 
 
