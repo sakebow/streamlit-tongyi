@@ -1,3 +1,5 @@
 import streamlit as st
 
-st.title("这是主页面")
+from utils import ContentHelper
+
+st.markdown(ContentHelper.get_markdown_content(__file__))

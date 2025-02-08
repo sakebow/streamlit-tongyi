@@ -1,4 +1,5 @@
-from typing import List, Sequence, Dict
+import os
+from typing import List, Sequence
 from pymilvus import MilvusClient
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
@@ -51,4 +52,12 @@ class RagHelper:
     client: MilvusClient = RagHelper.configure_retriever(uploaded_files)
     results = EmbeddingSearcher.embedding_search(client, DefaultCommonConfig.COLLECTION_NAME, user_input)
     content = "\n".join([result["entity"]["text"] for result in results])
+    return content
+
+class ContentHelper:
+  def get_markdown_content(file_path: str) -> Sequence[str]:
+    page_name, _ = os.path.splitext(os.path.basename(file_path))
+    md_file_path = os.path.join("page_md", f"{page_name}.md")
+    with open(md_file_path, 'r') as file:
+      content = file.read()
     return content
