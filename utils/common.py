@@ -1,5 +1,7 @@
 import os
+import importlib
 from pymilvus import MilvusClient
+from sqlalchemy.engine.row import Row
 from pydantic import BaseModel, Field
 from typing import List, Sequence, Any
 from streamlit.runtime.uploaded_file_manager import UploadedFile
@@ -62,3 +64,14 @@ class DBManager(BaseModel):
   link: str = Field(..., description="数据库连接地址")
   local_generator: Any = Field(..., description="实体类实例化解析生成器")
   def search(query_template): ...
+  def import_class_from_package(self, package_name, class_name):
+    _package = importlib.import_module(package_name)
+    if class_name not in _package.__all__:
+      raise ImportError(f"{class_name} not found in {package_name}")
+    cls = getattr(_package, class_name)
+    if cls is not None:
+      return cls
+    else:
+      raise ImportError(f"{class_name} not found in {package_name}")
+  def create_item_obj(self, row: Row):
+    return self.local_generator(**row._asdict()) if self.local_generator else None
