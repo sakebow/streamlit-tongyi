@@ -1,18 +1,11 @@
 import os
-from typing import List, Sequence
 from pymilvus import MilvusClient
+from pydantic import BaseModel, Field
+from typing import List, Sequence, Any
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 from utils.embeddings_manager import EmbeddingSearcher, Text2Embed
-
-class DefaultCommonConfig(enumerate):
-  DIMENSION: int = 1024
-  SPLIT_PATTERN_LIST: List = ["\n", "\n\n"]
-
-  DATABASE_NAME: str = "rag_test"
-  COLLECTION_NAME: str = "demo"
-
-  SUPPORT_TYPES = ["txt", "pdf"]
+from utils.config import DefaultCommonConfig
 
 class RagHelper:
   @staticmethod
@@ -26,7 +19,7 @@ class RagHelper:
       return []
     doc_content: List = []
     for file in uploaded_files:
-      doc_content.extend(Text2Embed.split_content(file, save_path = f"upload/{file.name}"))
+      doc_content.extend(Text2Embed.split_content(file, save_path = "upload"))
     
     embeddings: Sequence = [
       {"id": idx, "embeddings": Text2Embed.embeddings_content(s), "text": s}
@@ -63,3 +56,9 @@ class ContentHelper:
     with open(md_file_path, 'r') as file:
       content = file.read()
     return content
+
+class DBManager(BaseModel):
+  base_type: str = Field(..., description="数据库表名")
+  link: str = Field(..., description="数据库连接地址")
+  local_generator: Any = Field(..., description="实体类实例化解析生成器")
+  def search(query_template): ...

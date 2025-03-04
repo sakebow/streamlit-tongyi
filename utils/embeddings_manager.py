@@ -11,9 +11,7 @@ import dashscope
 import streamlit as st
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
-class DefaultCommonConfig(enumerate):
-  DIMENSION: int = 1024
-  SPLIT_PATTERN_LIST: List = ["\n", "\n\n"]
+from utils.config import DefaultCommonConfig
 
 class Text2Embed:
   """

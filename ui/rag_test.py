@@ -21,7 +21,7 @@ def configure_retriever(uploaded_files: Sequence[UploadedFile]) -> MilvusClient:
     return []
   doc_content: List = []
   for file in uploaded_files:
-    doc_content.extend(Text2Embed.split_content(file, save_path = f"upload/{file.name}"))
+    doc_content.extend(Text2Embed.split_content(file, save_path = "upload"))
   
   embeddings: Sequence = [
     {"id": idx, "embeddings": Text2Embed.embeddings_content(s), "text": s}

@@ -2,7 +2,9 @@
 
 >❗随着`langchain`的更新，库中大量内容也将翻新，并按照不同的功能分类存放，便于查看。
 
->❗该项目进一步通过`pyproject.toml`进行依赖管理，整个架构再次更新。
+> ~~❗该项目进一步通过`pyproject.toml`进行依赖管理，整个架构再次更新。~~
+
+> ❗`poetry`与`conda`会冲突，由于已经用了`conda`，不再强行转为`poetry`管理，重回`conda`管理。
 
 同样的，感谢[liuhuanyong](https://github.com/liuhuanyong)老哥提供的医药数据库与[ranying666](https://github.com/ranying666)老哥提供的`langchain+qwen`代码。
 
@@ -32,14 +34,20 @@
 $ git clone https://github.com/sakebow/streamlit-tongyi.git
 ```
 
-由于`poetry`的引入，因此依赖安装过程稍有变化，请按照以下步骤进行安装：
+~~由于`poetry`的引入，因此依赖安装过程稍有变化，请按照以下步骤进行安装：~~
 
-0. 若未使用`conda`，则直接跳转到步骤 $1$ ；若已安装`conda`，请不要卸载`conda`，直接利用虚拟环境执行依赖安装过程：
+~~0. 若未使用`conda`，则直接跳转到步骤 $1$ ；若已安装`conda`，请不要卸载`conda`，直接利用虚拟环境执行依赖安装过程：~~
+0. 若未使用`conda`，则使用方式二 ；若已安装`conda`，请使用方式一。
+
+方式一：
 
 ```bash
 $ conda create -n llm python=3.12 -y
 $ conda activate llm
+$ pip install -r requirements.txt
 ```
+
+方式二：
 
 1. 安装`poetry`：
 
