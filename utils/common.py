@@ -53,6 +53,11 @@ class RagHelper:
 
 class ContentHelper:
   def get_markdown_content(file_path: str) -> Sequence[str]:
+    """
+    将现有的markdown文件生成到streamlit页面中
+    params: file_path: str markdown文件路径
+    return: Sequence[str] markdown文件内容
+    """
     page_name, _ = os.path.splitext(os.path.basename(file_path))
     md_file_path = os.path.join("page_md", f"{page_name}.md")
     with open(md_file_path, 'r') as file:
@@ -60,18 +65,35 @@ class ContentHelper:
     return content
 
 class DBManager(BaseModel):
+  """
+  类似MyBatisPlus的数据库池，为方法增加SQL解析注解，直接在方法上写SQL即可执行结果
+  """
   base_type: str = Field(..., description="数据库表名")
   link: str = Field(..., description="数据库连接地址")
   local_generator: Any = Field(..., description="实体类实例化解析生成器")
+  # 查询方法
   def search(query_template): ...
   def import_class_from_package(self, package_name, class_name):
+    """
+    动态导入DTO类，用于保存SQL执行结果
+    params:
+      package_name: str 包名
+      class_name: str 类名
+    return: Any 类对象
+    """
+    # 导入包
     _package = importlib.import_module(package_name)
+    # 寻找是否存在该类
     if class_name not in _package.__all__:
       raise ImportError(f"{class_name} not found in {package_name}")
+    # 返回该类或者报错
     cls = getattr(_package, class_name)
     if cls is not None:
       return cls
     else:
       raise ImportError(f"{class_name} not found in {package_name}")
   def create_item_obj(self, row: Row):
+    """
+    将该类序列化输出
+    """
     return self.local_generator(**row._asdict()) if self.local_generator else None

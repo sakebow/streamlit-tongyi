@@ -35,16 +35,18 @@ class ElectricOrderItemDBManager(DBManager):
                 missing_params = required_params - provided_params
                 if missing_params:
                     raise ValueError(f"Missing required parameters: {', '.join(missing_params)}")
-                # 构建 SQL 语句，并考虑不同类型的数据格式
+                # 构建 SQL 语句
                 sql_query = text(query_template.replace("#{", ":").replace("}", ""))
                 print(f"Executing SQL: {sql_query}")
                 params = bound_args.arguments.copy()
+                # 格式兼容
                 for key, value in params.items():
                     if isinstance(value, datetime):
                         params[key] = value.strftime('%Y-%m-%d')
+                # 执行
                 engine = create_engine(self.link)
                 with engine.connect() as conn:
-                    result = conn.execute(sql_query, bound_args.arguments)
+                    result = conn.execute(sql_query, params)
                     search_result = [self.create_item_obj(row) for row in result]
                 return search_result
             return wrapper
