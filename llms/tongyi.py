@@ -1,5 +1,5 @@
 import streamlit as st
-from langchain_community.llms import Tongyi
+from langchain_community.llms.tongyi import Tongyi
 from langchain_core.language_models.llms import BaseLLM
 
 from llms.model import ModelConfig, LLMFactory

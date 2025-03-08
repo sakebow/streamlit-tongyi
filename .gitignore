@@ -7,6 +7,8 @@
 .git/
 .streamlit/*
 upload/*
+test
 
 *.db
 *.db.lock
+*.bak
