@@ -11,6 +11,13 @@ default_tongyi_config = ModelConfig(
   stream = False
 )
 
+omni_tongyi_config = ModelConfig(
+  name = "qwen-omni-turbo",
+  api_key = st.secrets["DASHSCOPE_API_KEY"],
+  top_p = 0.8,
+  stream = False
+)
+
 class TongyiFactory(LLMFactory):
   """
   这是通义千问的工厂类
@@ -28,7 +35,7 @@ class TongyiFactory(LLMFactory):
       streaming = self.config.stream
     )
 
-__all__ = ["TongyiFactory", "default_tongyi_config"]
+__all__ = ["TongyiFactory", "default_tongyi_config", "omni_tongyi_config"]
 
 if __name__ == "__main__":
   llm = TongyiFactory(default_tongyi_config).create()
