@@ -5,6 +5,8 @@ from langchain.callbacks.streamlit import StreamlitCallbackHandler
 
 from utils import CompletionUtils
 
+st.session_state["mmm"] = {}
+
 client = OpenAI(
     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
     api_key=st.secrets["DASHSCOPE_API_KEY"],
@@ -13,21 +15,20 @@ client = OpenAI(
 
 def write_message(role: str, message: str, save: bool = True):
   if save:
-    st.session_state.dashscope["messages"].append({"role": role, "content": message})
+    st.session_state["mmm"]["messages"].append({"role": role, "content": message})
   with st.chat_message(role):
     st.markdown(message)
 
 # print(CompletionUtils.mm_completion(client, "这幅图片讲了什么？", "/home/sakebow/Downloads/miku.jpg", st.session_state["mmm"]["messages"]))
 st.title("多模态")
 
-st.session_state["mmm"] = {}
 if "messages" not in st.session_state:
   st.session_state["mmm"]["messages"] = [{
     "role": "assistant",
     "content": "欢迎使用多模态，有什么能帮助你的吗？"
   }]
 
-for message in st.session_state.dashscope["messages"]:
+for message in st.session_state["mmm"]["messages"]:
   write_message(message['role'], message['content'], save = False)
 
 # import streamlit as st
