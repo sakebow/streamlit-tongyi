@@ -8,11 +8,11 @@
 
 |功能名称|阿里巴巴灵积平台|中国移动九天平台|
 |:---:|:---:|:---:|
-|基础问答|<span style="color:green">&#x2714;</span>|<span style="color:green">&#x2714;</span>|
-|聊天记忆|<span style="color:green">&#x2714;</span>|<span style="color:green">&#x2714;</span>|
-|联网搜索|<span style="color:green">&#x2714;</span>|<span style="color:red">&#x2716;</span>|
-|内部工具|<span style="color:green">&#x2714;</span>|<span style="color:red">&#x2716;</span>|
-|外部插件|<span style="color:green">&#x2714;</span>|<span style="color:red">&#x2716;</span>|
+|基础问答|&#x2714;|&#x2714;|
+|聊天记忆|&#x2714;|&#x2714;|
+|联网搜索|&#x2714;|&#x2716;|
+|内部工具|&#x2714;|&#x2716;|
+|外部插件|&#x2714;|&#x2716;|
 
 因此，在执行过程中，仅保证灵积平台的正常使用，九天平台将保证界面，但不会保证功能。
 

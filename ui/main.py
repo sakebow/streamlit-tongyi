@@ -1,5 +1,5 @@
 import streamlit as st
 
-from utils import ContentHelper
+from utils.page_content import get_markdown_content
 
-st.markdown(ContentHelper.get_markdown_content(__file__))
+st.markdown(get_markdown_content(__file__))
