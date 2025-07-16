@@ -1,7 +1,7 @@
 from httpx import Client
 from threading import Lock
-from typing import ClassVar, Optional
 from pydantic import BaseModel, Field
+from typing import ClassVar, Optional, List, Any
 
 from langchain_openai.chat_models.base import ChatOpenAI
 
@@ -39,3 +39,16 @@ class BaseLLMFactory(BaseFactory):
             max_tokens=max_tokens,
             http_client=client
         )
+
+class BaseEmbeddingFactory(BaseFactory):
+    def embeddings(self, *args, **kwargs) -> List[float]:
+        """
+        embedding text into vector
+        well, maybe not so important for now...
+        """
+    def rerank(self, *args, **kwargs) -> List[Any]:
+        """
+        rerank documents
+        it has to be implemented
+        """
+        raise NotImplementedError

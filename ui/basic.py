@@ -1,35 +1,18 @@
 import streamlit as st
+from httpx import Client
 from langchain_openai.chat_models.base import ChatOpenAI
 
 from factory.cmdi import CMDIFactory
 from factory.tongyi import TongyiFactory
-from factory.client import ClientFactory
 from utils.chat_render import ChatRenderer
-
-llm: ChatOpenAI = CMDIFactory.get_instance(
-    base_url=st.secrets["DEEP_URL"],
-    api_key=st.secrets["APPCODE_KEY"],
-    _client = ClientFactory.get_instance(
-        base_url=st.secrets["DEEP_URL"],
-        api_key=st.secrets["APPCODE_KEY"],
-        timeout=30,
-    ).client()
-).build(
-    model = "DeepSeek-70B",
-    temperature = 0.7,
-    max_tokens = 4096
-)
 
 # llm: ChatOpenAI = TongyiFactory.get_instance(
 #     base_url = st.secrets["DASH_URL"],
 #     api_key = st.secrets["DASHSCOPE_API_KEY"],
-#     _client = ClientFactory.get_instance(
-#         base_url=st.secrets["DASH_URL"],
-#         api_key=st.secrets["DASHSCOPE_API_KEY"],
-#         timeout=30,
-#     ).client()
+#     _client = client
 # ).build(
 #     model = "qwen-max",
+#     client = client
 # )
 
 if "dashscope" not in st.session_state:
@@ -50,7 +33,24 @@ for m in st.session_state["dashscope"]["messages"]:
 
 # ---------- 新输入 ----------
 if prompt := st.chat_input("你得注意你的言行……求你了……(´;ω;`)"):
-    ChatRenderer("user").render(prompt)               # 用户消息
-    # LLM 流式响应
-    response_stream = llm.stream(prompt)              # Iterator[BaseMessageChunk]
-    ChatRenderer("assistant").render(response_stream) # 打字机效果
+    st.session_state["dashscope"]["messages"].append({
+        "role": "user", "content": prompt
+    })
+    with Client(
+        base_url=st.secrets["DEEP_URL"],
+        headers={"Authorization": f'Bearer {st.secrets["APPCODE_KEY"]}'},
+        timeout=30,
+    ) as client:
+        llm: ChatOpenAI = CMDIFactory.get_instance(
+            base_url=st.secrets["DEEP_URL"],
+            api_key=st.secrets["APPCODE_KEY"],
+        ).build(
+            model = "DeepSeekR1",
+            temperature = 0.7,
+            max_tokens = 4096,
+            client = client
+        )
+        ChatRenderer("user").render(prompt)               # 用户消息
+        # LLM 流式响应
+        response_stream = llm.stream(prompt)              # Iterator[BaseMessageChunk]
+        ChatRenderer("assistant").render(response_stream) # 打字机效果

@@ -1,21 +1,19 @@
 import streamlit as st
+from httpx import Client
 from langchain_openai.chat_models.base import ChatOpenAI
-from langchain_core.messages import HumanMessage
 
-from factory import TongyiFactory, ClientFactory
+from factory.cmdi import CMDIFactory
+from factory.tongyi import TongyiFactory
 from utils.chat_render import ChatRenderCallbackHandler
 
-llm: ChatOpenAI = TongyiFactory.get_instance(
-    base_url=st.secrets["DASH_URL"],
-    api_key=st.secrets["DASHSCOPE_API_KEY"],
-    _client = ClientFactory.get_instance(
-        base_url=st.secrets["DASH_URL"],
-        api_key=st.secrets["DASHSCOPE_API_KEY"],
-        timeout=30,
-    ).client()
-).build(
-    model = "qwen-max",
-)
+# llm: ChatOpenAI = TongyiFactory.get_instance(
+#     base_url = st.secrets["DASH_URL"],
+#     api_key = st.secrets["DASHSCOPE_API_KEY"],
+#     _client = client
+# ).build(
+#     model = "qwen-max",
+#     client = client
+# )
 
 if "dashscope" not in st.session_state:
     st.session_state["dashscope"] = {
@@ -36,14 +34,28 @@ for m in st.session_state["dashscope"]["messages"]:
 # ---------- 新输入 ----------
 prompt = st.chat_input("你得注意你的言行……求你了……(´;ω;`)")
 if prompt:
-    # 1️⃣ 先把用户问句写入历史
-    st.session_state.dashscope["messages"].append(
-        {"role": "user", "content": prompt}
-    )
-    st.chat_message("user").markdown(prompt)
-    handler = ChatRenderCallbackHandler(role="assistant")
+    with Client(
+        base_url=st.secrets["DEEP_URL"],
+        headers={"Authorization": f'Bearer {st.secrets["APPCODE_KEY"]}'},
+        timeout=30,
+    ) as client:
+        llm: ChatOpenAI = CMDIFactory.get_instance(
+            base_url=st.secrets["DEEP_URL"],
+            api_key=st.secrets["APPCODE_KEY"],
+        ).build(
+            model = "DeepSeekR1",
+            temperature = 0.7,
+            max_tokens = 4096,
+            client = client
+        )
+        # 1️⃣ 先把用户问句写入历史
+        st.session_state.dashscope["messages"].append(
+            {"role": "user", "content": prompt}
+        )
+        st.chat_message("user").markdown(prompt)
+        handler = ChatRenderCallbackHandler(role="assistant")
 
-    # 2️⃣ 流式调用 + 回调渲染
-    _ = list(
-        llm.stream([HumanMessage(content=prompt)], config={"callbacks": [handler]})
-    )
+        # 2️⃣ 流式调用 + 回调渲染
+        _ = list(
+            llm.stream(st.session_state.dashscope["messages"], config={"callbacks": [handler]})
+        )
