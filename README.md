@@ -69,6 +69,10 @@ $ poetry install
 
 目前必须要有的参数只有一个：`DASHSCOPE_API_KEY`，用于调用`DashScope`的`API`。各位可以[移步此处](https://bailian.console.aliyun.com/)进行申请或购买。
 
+> 由于经费限制，现在主要用的是本地大模型，需要各位在使用时手动打开`TongyiFactory`的注释才可以使用通义千问。
+>
+> 如果各位本地拥有大模型的话，理论上能够兼容。
+
 另外的参数暂时不是必须的，目前提供功能的只有：`APPCODE_TYP`、`APPCODE_KEY`、`NEO4J_ADDR`、`NEO4J_PORT`、`NEO4J_USER`、`NEO4J_PASS`、`BASE_URL`、`OPEN_URL`。
 
 其中：

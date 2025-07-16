@@ -1,37 +1,21 @@
 import streamlit as st
 from langchain_openai.chat_models.base import ChatOpenAI
-
-from factory.cmdi import CMDIFactory
-from factory.tongyi import TongyiFactory
-from factory.client import ClientFactory
-from utils.chat_render import ChatRenderCallbackHandler
 from langchain_core.messages import HumanMessage
 
-llm: ChatOpenAI = CMDIFactory.get_instance(
-    base_url=st.secrets["DEEP_URL"],
-    api_key=st.secrets["APPCODE_KEY"],
+from factory import TongyiFactory, ClientFactory
+from utils.chat_render import ChatRenderCallbackHandler
+
+llm: ChatOpenAI = TongyiFactory.get_instance(
+    base_url=st.secrets["DASH_URL"],
+    api_key=st.secrets["DASHSCOPE_API_KEY"],
     _client = ClientFactory.get_instance(
-        base_url=st.secrets["DEEP_URL"],
-        api_key=st.secrets["APPCODE_KEY"],
+        base_url=st.secrets["DASH_URL"],
+        api_key=st.secrets["DASHSCOPE_API_KEY"],
         timeout=30,
     ).client()
 ).build(
-    model = "DeepSeek-70B",
-    temperature = 0.7,
-    max_tokens = 4096
+    model = "qwen-max",
 )
-
-# llm: ChatOpenAI = TongyiFactory.get_instance(
-#     base_url = st.secrets["DASH_URL"],
-#     api_key = st.secrets["DASHSCOPE_API_KEY"],
-#     _client = ClientFactory.get_instance(
-#         base_url=st.secrets["DASH_URL"],
-#         api_key=st.secrets["DASHSCOPE_API_KEY"],
-#         timeout=30,
-#     ).client()
-# ).build(
-#     model = "qwen-max",
-# )
 
 if "dashscope" not in st.session_state:
     st.session_state["dashscope"] = {
@@ -43,7 +27,7 @@ if "dashscope" not in st.session_state:
         ]
     }
 
-st.title("基础问答页面")
+st.title("被动触发Render模块")
 
 # ---------- 回放历史 ----------
 for m in st.session_state["dashscope"]["messages"]:
