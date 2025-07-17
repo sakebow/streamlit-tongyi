@@ -4,8 +4,9 @@ from langchain_openai.chat_models.base import ChatOpenAI
 
 from factory.tongyi import TongyiFactory
 from utils.chat_render import ChatRenderCallbackHandler
+from utils.page_content import init_page_state
 
-PAGE_KEY = (Path(__file__).parent.name, Path(__file__).stem)
+PAGE_KEY = init_page_state(__file__)
 
 llm: ChatOpenAI = TongyiFactory.get_instance(
     base_url = st.secrets["DASH_URL"],
@@ -13,22 +14,6 @@ llm: ChatOpenAI = TongyiFactory.get_instance(
 ).build(
     model = "qwen-max",
 )
-
-if (
-    Path(__file__).parent.name not in st.session_state
-):
-    st.session_state[Path(__file__).parent.name] = {}
-if (
-    Path(__file__).stem not in st.session_state[Path(__file__).parent.name]
-):
-    st.session_state[Path(__file__).parent.name] = {
-        Path(__file__).stem: [
-            {
-                "role": "assistant",
-                "content": "这只是一个基础测试页面，你不可以问一些奇怪的问题，不然的话我也会变得奇怪的இдஇ"
-            }
-        ]
-    }
 
 st.title("被动触发Render模块")
 
