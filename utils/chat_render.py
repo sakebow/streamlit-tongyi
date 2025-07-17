@@ -1,18 +1,23 @@
 # handler.py
 import re, time
 import streamlit as st
-from typing import Any
+from typing import Any, Sequence
 from collections.abc import Iterator
 
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain_core.messages.base import BaseMessageChunk, BaseMessage
+
+from utils.page_content import get_messages_container
 
 _THINK_RE = re.compile(r"<think>(.*?)</think>", re.S)
 
 class ChatRenderer:
     """同时管理 expander + chat_message 的流式渲染器"""
 
-    def __init__(self, role: str, save: bool = True, typing_delay: float = 0.02):
+    def __init__(
+        self, role: str, save: bool = True, typing_delay: float = 0.02,
+        state_path: Sequence[str] | str = "dashscope"
+    ):
         self.role          = role
         self.save          = save
         self.typing_delay  = typing_delay
@@ -28,6 +33,9 @@ class ChatRenderer:
         # 缓冲区
         self._buffer = ""
 
+        # 取得可写的 messages list（根据路径自动创建）
+        self._messages = get_messages_container(state_path)
+
     # ===== 对外唯一接口 =====
     def render(self, msg: "str | BaseMessage | Iterator[BaseMessageChunk]"):
         if isinstance(msg, str):
@@ -42,9 +50,7 @@ class ChatRenderer:
             raise TypeError("不支持的消息类型")
 
         if self.save:
-            st.session_state.dashscope["messages"].append(
-                {"role": self.role, "content": self._buffer}
-            )
+            self._messages.append({"role": self.role, "content": self._buffer})
 
     # ===== 内部 =====
     def _update(self, new_text: str):
@@ -76,6 +82,7 @@ class ChatRenderCallbackHandler(BaseCallbackHandler):
         role: str = "assistant",
         save: bool = True,
         label: str = "🤔 思考过程",
+        state_path: Sequence[str] | str = "dashscope",
     ):
         super().__init__()
         self.role   = role
@@ -92,6 +99,9 @@ class ChatRenderCallbackHandler(BaseCallbackHandler):
         # 累积完整文本
         self.buffer = ""
 
+        # 取得可写的 messages list（根据路径自动创建）
+        self._messages = get_messages_container(state_path)
+
     # ===== Callback API =====
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         """收到新 token 就增量刷新 UI。"""
@@ -100,9 +110,7 @@ class ChatRenderCallbackHandler(BaseCallbackHandler):
     def on_llm_end(self, response, **kwargs: Any) -> None:
         """流式结束，把完整内容写进 session_state。"""
         if self.save:
-            st.session_state.dashscope["messages"].append(
-                {"role": self.role, "content": self.buffer}
-            )
+            self._messages.append({"role": self.role, "content": self.buffer})
 
     # ===== 私有 =====
     def _update(self, delta: str) -> None:

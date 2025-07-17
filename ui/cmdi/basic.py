@@ -1,23 +1,22 @@
 import streamlit as st
+from pathlib import Path
 from httpx import Client
 from langchain_openai.chat_models.base import ChatOpenAI
 
 from factory.cmdi import CMDIFactory
-from factory.tongyi import TongyiFactory
 from utils.chat_render import ChatRenderer
 
-# llm: ChatOpenAI = TongyiFactory.get_instance(
-#     base_url = st.secrets["DASH_URL"],
-#     api_key = st.secrets["DASHSCOPE_API_KEY"],
-#     _client = client
-# ).build(
-#     model = "qwen-max",
-#     client = client
-# )
+PAGE_KEY = (Path(__file__).parent.name, Path(__file__).stem)
 
-if "dashscope" not in st.session_state:
-    st.session_state["dashscope"] = {
-        "messages": [
+if (
+    Path(__file__).parent.name not in st.session_state
+):
+    st.session_state[Path(__file__).parent.name] = {}
+if (
+    Path(__file__).stem not in st.session_state[Path(__file__).parent.name]
+):
+    st.session_state[Path(__file__).parent.name] = {
+        Path(__file__).stem: [
             {
                 "role": "assistant",
                 "content": "这只是一个基础测试页面，你不可以问一些奇怪的问题，不然的话我也会变得奇怪的இдஇ"
@@ -28,12 +27,14 @@ if "dashscope" not in st.session_state:
 st.title("基础问答页面")
 
 # ---------- 回放历史 ----------
-for m in st.session_state["dashscope"]["messages"]:
-    ChatRenderer(m["role"], save=False).render(m["content"])
+for m in st.session_state[Path(__file__).parent.name][Path(__file__).stem]:
+    ChatRenderer(
+        m["role"], save=False, state_path = PAGE_KEY
+    ).render(m["content"])
 
 # ---------- 新输入 ----------
 if prompt := st.chat_input("你得注意你的言行……求你了……(´;ω;`)"):
-    st.session_state["dashscope"]["messages"].append({
+    st.session_state[Path(__file__).parent.name][Path(__file__).stem].append({
         "role": "user", "content": prompt
     })
     with Client(
@@ -50,7 +51,14 @@ if prompt := st.chat_input("你得注意你的言行……求你了……(´;ω;
             max_tokens = 4096,
             client = client
         )
-        ChatRenderer("user").render(prompt)               # 用户消息
+
+        ChatRenderer("user", state_path = PAGE_KEY).render(
+            prompt               # 用户消息
+        )
         # LLM 流式响应
-        response_stream = llm.stream(prompt)              # Iterator[BaseMessageChunk]
-        ChatRenderer("assistant").render(response_stream) # 打字机效果
+        response_stream = llm.stream(
+            st.session_state[Path(__file__).parent.name][Path(__file__).stem]              # Iterator[BaseMessageChunk]
+        )
+        ChatRenderer("assistant", state_path = PAGE_KEY).render(
+            response_stream      # 大模型消息
+        )
