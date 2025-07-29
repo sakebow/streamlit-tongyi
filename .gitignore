@@ -8,7 +8,10 @@
 .streamlit/*
 upload/*
 test
+_*/
 
 *.db
 *.db.lock
 *.bak
+test*
+*.docx

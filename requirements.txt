@@ -19,6 +19,7 @@ pydantic-settings==2.7.1
 pydantic_core==2.27.2
 pymilvus==2.5.4
 PyYAML==6.0.2
+redis==6.2.0
 requests==2.32.3
 SQLAlchemy==2.0.37
 streamlit==1.41.1

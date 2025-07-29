@@ -12,8 +12,8 @@ class CMDIEmbeddingFactory(BaseEmbeddingFactory):
         model: str = "bge-m3", encoding_format="float"
     ):
         client: Client = Client(
-            base_url = st.secrets["BGEM_URL"],
-            headers  = {"Authorization": f"Bearer {st.secrets['APPCODE_KEY']}"},
+            base_url = self.base_url,
+            headers  = {"Authorization": f"Bearer {self.api_key}"},
             timeout  = 30,
         )
         try:
@@ -39,10 +39,10 @@ class CMDIEmbeddingFactory(BaseEmbeddingFactory):
     def rerank(
         self, query: str, documents: List[str],
         model: str = "bge-m3", top_n: int = 5, return_documents: bool = True
-    ):
+    ) -> List:
         client: Client = Client(
-            base_url = st.secrets["BGEM_URL"],
-            headers  = {"Authorization": f"Bearer {st.secrets['APPCODE_KEY']}"},
+            base_url = self.base_url,
+            headers  = {"Authorization": f"Bearer {self.api_key}"},
             timeout  = 30,
         )
         try:

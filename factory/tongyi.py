@@ -25,7 +25,7 @@ class TongyiEmbeddingFactory(BaseEmbeddingFactory):
             model = model,
             input = input,
             dimension = dimension,
-            api_key=st.secrets["DASHSCOPE_API_KEY"],
+            api_key=self.api_key,
         )
         if resp.status_code == HTTPStatus.OK:
             return resp.output["embeddings"][0]["embedding"]
@@ -130,7 +130,7 @@ class TongyiEmbeddingFactory(BaseEmbeddingFactory):
         model: str = TextEmbedding.Models.text_embedding_v3,
         db_file: str = "rag_test", collection_name: str = "demo",
         dimension: int = 1024, top_n: int = 5,
-    ):
+    ) -> ExtraList:
         embeddings: List = self.embeddings(documents, model)
         milvus_client: MilvusClient = None
         milvus_client = self._create_or_replace(
@@ -146,7 +146,7 @@ class TongyiEmbeddingFactory(BaseEmbeddingFactory):
 
 if __name__ == "__main__":
     import streamlit as st
-    response: List = TongyiEmbeddingFactory.get_instance(
+    response: ExtraList = TongyiEmbeddingFactory.get_instance(
         base_url = st.secrets["DASH_URL"],
         api_key = st.secrets["DASHSCOPE_API_KEY"],
     ).rerank(
