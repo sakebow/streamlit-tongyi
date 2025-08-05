@@ -68,10 +68,15 @@ class CMDIEmbeddingFactory(BaseEmbeddingFactory):
             client.close()
     
 if __name__ == "__main__":
-    import streamlit as st
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    BGEM_URL = os.environ["BGEM_URL"]
+    DEEP_URL = os.environ["DEEP_URL"]
+    APPCODE = os.environ["APPCODE_KEY"]
     response = CMDIEmbeddingFactory.get_instance(
-        base_url = st.secrets["BGEM_URL"],
-        api_key  = st.secrets["APPCODE_KEY"]
+        base_url = BGEM_URL,
+        api_key  = APPCODE
     ).rerank(
         query = "苹果公司的创始人是谁？",
         documents = ["苹果公司成立于1976年，由史蒂夫乔布斯、斯蒂夫·沃兹尼亚克和乔纳森·乔丹共同创建。", "苹果公司总部位于美国加利福尼亚州旧金山", "柳景兴正在吃苹果"],
@@ -81,16 +86,15 @@ if __name__ == "__main__":
     )
     print(response)
     
-    from langchain_core.messages import BaseMessage
-    from langchain_openai.chat_models.base import ChatOpenAI
+    from langchain_openai.chat_models import ChatOpenAI
     with Client(
-        base_url = st.secrets["DEEP_URL"],
-        headers  = {"Authorization": f"Bearer {st.secrets['APPCODE_KEY']}"},
+        base_url = DEEP_URL,
+        headers  = {"Authorization": f"Bearer {APPCODE}"},
         timeout  = 30,
     ) as client:
         llm: ChatOpenAI = CMDIFactory.get_instance(
-            base_url=st.secrets["DEEP_URL"],
-            api_key=st.secrets["APPCODE_KEY"]
+            base_url=DEEP_URL,
+            api_key=APPCODE
         ).build(
             model = "DeepSeekR1",
             temperature = 0.7,

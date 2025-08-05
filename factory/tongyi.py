@@ -145,10 +145,14 @@ class TongyiEmbeddingFactory(BaseEmbeddingFactory):
         return response
 
 if __name__ == "__main__":
-    import streamlit as st
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    DASH_URL = os.environ["DASH_URL"]
+    APPCODE = os.environ["DASHSCOPE_API_KEY"]
     response: ExtraList = TongyiEmbeddingFactory.get_instance(
-        base_url = st.secrets["DASH_URL"],
-        api_key = st.secrets["DASHSCOPE_API_KEY"],
+        base_url = DASH_URL,
+        api_key = APPCODE,
     ).rerank(
         query = "苹果公司的创始人是谁？",
         documents = ["苹果公司成立于1976年，由史蒂夫乔布斯、斯蒂夫·沃兹尼亚克和乔纳森·乔丹共同创建。", "苹果公司总部位于美国加利福尼亚州旧金山", "柳景兴正在吃苹果"],

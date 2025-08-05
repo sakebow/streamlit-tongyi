@@ -1,16 +1,21 @@
+import os
 import json
-import streamlit as st
+from dotenv import load_dotenv
 from functools import lru_cache
 from redis import Redis, ConnectionPool, RedisError
 
+load_dotenv()
+REDIS_ADDR = os.environ["REDIS_ADDR"]
+REDIS_PORT = os.environ["REDIS_PORT"]
+REDIS_PASS = os.environ["REDIS_PASS"]
 TTL_TIMEOUT = 60 * 60
 
 @lru_cache(maxsize=1)
 def get_redis() -> Redis:
     pool = ConnectionPool(
-        host=st.secrets["REDIS_ADDR"],
-        port=st.secrets["REDIS_PORT"],
-        password=st.secrets["REDIS_PASS"],
+        host=REDIS_ADDR,
+        port=REDIS_PORT,
+        password=REDIS_PASS,
         db=0,
         max_connections=100,
     )

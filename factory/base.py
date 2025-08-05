@@ -3,7 +3,7 @@ from threading import Lock
 from pydantic import BaseModel, Field
 from typing import ClassVar, Optional, List, Any
 
-from langchain_openai.chat_models.base import ChatOpenAI
+from langchain_openai.chat_models import ChatOpenAI
 
 class BaseFactory(BaseModel):
     base_url: str = Field(..., description = "API Base URL, NonNullable")
