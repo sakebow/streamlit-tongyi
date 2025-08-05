@@ -46,7 +46,7 @@ def init_page_state(
         st.session_state[group] = {}
     if page not in st.session_state[group]:
         st.session_state[group][page] = [{
-            "role": "assistant",
+            "role": "system",
             "content": default_welcome
                 or "这只是一个基础测试页面，你不可以问一些奇怪的问题，不然我也会变得奇怪的இдஇ"
         }]

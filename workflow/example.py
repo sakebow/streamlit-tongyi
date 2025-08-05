@@ -1,7 +1,6 @@
 import re, os
 import streamlit as st
 from httpx import Client, Timeout
-from dataclasses import dataclass
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 from langgraph.graph.message import add_messages
@@ -10,12 +9,12 @@ from langchain_core.runnables import RunnableConfig
 from langchain_community.chat_models import ChatOpenAI
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 from typing import Optional, Literal, Annotated, Sequence, Dict, Any
-from langchain_core.messages import AnyMessage, HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, BaseMessage, SystemMessage
 
 # ============== State 定义 ==============
 class AppState(TypedDict):
     # 会话消息（自动追加）
-    messages: Annotated[list[AnyMessage], add_messages]
+    messages: Annotated[list[BaseMessage], add_messages]
     # 用户上传的文件（Streamlit UploadedFile 或 None）
     uploaded_file: UploadedFile
     # 意图：0=普通聊天, 1=文件解析
@@ -37,7 +36,10 @@ def _get_user_input(state: AppState) -> HumanMessage:
     """
     user_text = ""
     for m in reversed(state["messages"]):
-        if isinstance(m, HumanMessage):
+        if isinstance(m, HumanMessage) or (
+            "content" in m and "role" in m and
+            m["role"] == "user"
+        ):
             user_text = m.content if m.content else ""
             break
     if user_text == "":
@@ -60,22 +62,28 @@ def node_intent(state: AppState, config: RunnableConfig) -> Dict[str, Any]:
         "严格遵守：只有 0 或 1 两种；不要解释任何内容。\n"
         f"用户消息：{user_text}"
     )
-    res: AnyMessage = intent_llm.invoke(prompt)
+    res: BaseMessage = intent_llm.invoke(prompt)
     if res.content[-1] in [0, 1]:
         return {"branch": int(res.content[-1])}
     else:
         return {"branch": 0}
 
-def node_chat(state: AppState, config: RunnableConfig) -> Dict[str, Any]:
-    """
-    直接开始聊天
-    """
-    chat_llm: ChatOpenAI = config["configurable"]["models"]["chat"]
-    response = chat_llm.invoke(state["messages"])
-    return {
-        "message": [AIMessage(content=response.content)],
-        "final_answer": response.content,
-    }
+# ============== 用户随机聊天 ==============
+def node_chat(
+    state: AppState, config: RunnableConfig
+) -> Dict[str, Any]:
+    chat_llm: ChatOpenAI = config.get("configurable", {}).get("models", {}).get("chat")  # 只在这里使用
+    prompt = (
+        "你是一个刚毕业进入职场的女孩子；\n"
+        "有学生活泼开朗的气质，一直给人元气满满的样子；\n"
+        "有成年人特有的稳重与矜持，虽然偶尔犯错，但是多少有些给人可靠的感觉；\n"
+        "允许你使用错别字，表现出偶尔犯错的感觉。\n"
+        "但是最好不要过于俏皮，会显得有些孩子气，不太适合职场环境。\n"
+        "你可以使用颜文字，但是请尽量避免带有两个～的表情，或者带有`的表情。\n"
+        f"用户消息：{state.get('messages', [])}"
+    )
+    res: BaseMessage = chat_llm.invoke(prompt)
+    return {"final_answer": res.content, "messages": AIMessage(content=res.content)}
 
 def _extract_file_content(uploadedfile: UploadedFile, save_path: str = None) -> Sequence[str]:
     _tmp_one_file_texts:str = uploadedfile.read().decode("utf-8", errors = "ignore")
@@ -110,12 +118,14 @@ def node_rag(state: AppState, config: RunnableConfig) -> Dict[str, Any]:
     user_q = _get_user_input(state = state)
     sys_prompt = (
         "你将根据【文档内容】回答用户问题。\n"
-        "若文档未涵盖，明确说明并仅基于文档给出可验证的结论；必要时给出下一步建议。\n"
+        "若文档未涵盖，明确说明并仅基于文档给出可验证的结论；\n"
+        "坚决不可以做出超出文档范围的回答。\n"
+        "必要时给出下一步建议，非必要时可以仅回答文档未提及相关内容。\n"
     )
     composed_messages = [
-        {"role": "system", "content": sys_prompt},
-        {"role": "user", "content": f"文档内容（节选，可不完整）：\n{state.get('file_text','')[:6000]}"},
-        {"role": "user", "content": f"用户问题：\n{user_q}"}
+        SystemMessage(content=sys_prompt),
+        SystemMessage(content=f"文档内容：\n{state.get('file_text','')}"),
+        HumanMessage(content=f"用户问题：\n{user_q}")
     ]
     qa_llm: ChatOpenAI = config["configurable"]["models"]["qa"]
     res = qa_llm.invoke(composed_messages)
@@ -184,7 +194,7 @@ if __name__ == "__main__":
 
         models = {"intent": intent_model, "chat": chat_model, "qa": qa_model}
 
-        result: Dict[str, Any] = graph.invoke(
+        result = graph.stream(
             {
                 "messages": [HumanMessage(content="你好，我是小娜，请问有什么问题可以帮您？")],
             },
