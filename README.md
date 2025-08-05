@@ -2,15 +2,15 @@
 
 >❗随着`langchain`的更新，库中大量内容也将翻新，并按照不同的功能分类存放，便于查看。
 >
-> ~~❗该项目进一步通过`pyproject.toml`进行依赖管理，整个架构再次更新。~~
->
 >❗`poetry`与`conda`会冲突，由于已经用了`conda`，不再强行转为`poetry`管理，重回`conda`管理。
 >
 >❗发现了部分智能体接入`OpenAI`智能体的方法，整个架构再次更新。
+>
+>❗发现了MCP接入的方法，`streamlit`被删除，整个架构再次更新为纯后端。
+>
+> 感谢[liuhuanyong](https://github.com/liuhuanyong)老哥提供的医药数据库与[ranying666](https://github.com/ranying666)老哥提供的`langchain+qwen`代码。
 
-同样的，感谢[liuhuanyong](https://github.com/liuhuanyong)老哥提供的医药数据库与[ranying666](https://github.com/ranying666)老哥提供的`langchain+qwen`代码。
-
-## 依赖安装
+# 依赖安装
 
 >❗本项目目前测试<span style="color:green">**通过**</span>的环境为：
 >
@@ -35,62 +35,59 @@
 ```bash
 $ git clone https://github.com/sakebow/streamlit-tongyi.git
 ```
-
-~~由于`poetry`的引入，因此依赖安装过程稍有变化，请按照以下步骤进行安装：~~
-
-~~0. 若未使用`conda`，则直接跳转到步骤 $1$ ；若已安装`conda`，请不要卸载`conda`，直接利用虚拟环境执行依赖安装过程：~~
-0. 若未使用`conda`，则使用方式二 ；若已安装`conda`，请使用方式一。
-
-方式一：
+0. 使用`conda`安装依赖包
 
 ```bash
-$ conda create -n llm python=3.12 -y
-$ conda activate llm
+$ conda create -n vllm python=3.12 -y
+$ conda activate vllm
 $ pip install -r requirements.txt
 ```
 
-方式二：
+# 参数配置
 
-1. 安装`poetry`：
+目前项目的配置文件更换为`.env`文件。其中的配置项有：
 
-```bash
-$ pip install poetry
+|数据项|描述|默认值|是否必须
+|:--:|:--:|:--:|:---:|
+|DASHSCOPE_API_KEY|通义千问的api-key|无||
+|DASH_URL|通义千问接入OpenAI的URL|无||
+|DEEP_URL|自定义大模型接入OpenAI的URL|无||
+|BGEM_URL|自定义词嵌入模型接入OpenAI的URL|无||
+|APPCODE_KEY|自定义大模型的api-key|无||
+|TIMEOUT|自定义大模型网络请求客户端的超时时间（秒）|30|是|
+|NEO4J_ADDR|Neo4j数据库的ip|无|否|
+|NEO4J_PORT|Neo4j数据库的端口|无|否|
+|NEO4J_USER|Neo4j数据库的用户名|无|否|
+|NEO4J_PASS|Neo4j数据库的密码|无|否|
+|REDIS_ADDR|Redis数据库的ip|无|否|
+|REDIS_PORT|Redis数据库的端口|无|否|
+
+其中，通义千问大模型与自定义大模型的URL与api-key需要二选一，或者都要。
+
+# 项目体验
+
+使用脚本或者`IDE`执行`server.py`文件，即可启动项目中的示例。
+
+启动后，暴露端口$8000$。
+
+使用`curl`、`apifox`等客户端请求即可查看实例。下面给出`curl`的示例：
+
+```python
+curl -N -X POST http://localhost:8000/mcp \
+-H "Content-Type: application/json" \
+-H "Accept: application/json, text/event-stream" \
+--data '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+        "protocolVersion": "2025-03-26",
+        "capabilities": {},
+        "clientInfo": {
+            "name": "curl", "version": "8.8"
+        }
+    }
+}'
 ```
 
-2. 安装项目依赖：
-
-```bash
-$ poetry install
-```
-
-## 参数配置
-
-项目的`.streamlit`文件夹中存在配置文件`secrets.toml`，配置其中所需要的参数即可。
-
-目前必须要有的参数只有一个：`DASHSCOPE_API_KEY`，用于调用`DashScope`的`API`。各位可以[移步此处](https://bailian.console.aliyun.com/)进行申请或购买。
-
-> 由于经费限制，现在主要用的是本地大模型，需要各位在使用时手动打开`TongyiFactory`的注释才可以使用通义千问。
->
-> 如果各位本地拥有大模型的话，理论上能够兼容。
-
-另外的参数暂时不是必须的，目前提供功能的只有：`APPCODE_TYP`、`APPCODE_KEY`、`NEO4J_ADDR`、`NEO4J_PORT`、`NEO4J_USER`、`NEO4J_PASS`、`BASE_URL`、`OPEN_URL`。
-
-其中：
-
-- `NEO4J_ADDR`、`NEO4J_PORT`、`NEO4J_USER`、`NEO4J_PASS`用于提供知识图谱服务
-  - 主要方便用户自行添加知识图谱。
-- `APPCODE_TYP`、`APPCODE_KEY`、`BASE_URL`、`OPEN_URL`提供自定义大模型服务
-  - 主要方便用户自行添加`MindIE`部署的大模型服务；
-  - 或者其他大模型，只要返回结果兼容`OpenAI`格式即可；
-  - 目前测试通过的大模型有：
-    - 九天大模型
-
-## 项目体验
-
-当然，体验之前需要各位最起码购买了阿里云百炼的`api-key`，或者说本地已经部署了一个大模型。
-
-把参数写入配置文件，就可以运行看看了：
-
-```shell
-$ streamlit run app.py
-```
+该步骤完成了一个`initialize`的请求，主要是获得其中的`Mcp-Session-Id`。然后就可以继续访问`MCP`方法。
